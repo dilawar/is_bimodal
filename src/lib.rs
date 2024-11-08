@@ -187,6 +187,14 @@ mod tests {
         assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 20, 11]) < 0.0);
     }
 
+    // These should pass but currently failing.
+    #[test]
+    #[ignore]
+    fn test_these_should_be_bimodal() {
+        assert!(is_histogram_bimodal(vec![4, 1, 1, 4, 1]));
+        assert!(is_histogram_bimodal(vec![1, 4, 1, 4, 1]));
+    }
+
     fn compute_a_str(layer: &str) -> f64 {
         compute_a(&layer.chars().map(|x| x == '1').collect::<Vec<_>>())
     }
