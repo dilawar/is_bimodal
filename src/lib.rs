@@ -1,12 +1,23 @@
 //! Check bimodality of a distribution using `van_der_eijk` function.
 
+use pyo3::prelude::*;
+
+/// A Python module implemented in Rust.
+#[pymodule]
+fn is_bimodal(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(is_histogram_bimodal, m)?)?;
+    m.add_function(wrap_pyfunction!(van_der_eijk, m)?)?;
+    Ok(())
+}
+
 /// Return the A score ref <https://www.researchgate.net/publication/225958476_Measuring_Agreement_in_Ordered_Rating_Scales>
 ///
 /// # Limiations
 ///
 /// 1. The first half of the histogram should not not be way too heavy (>2x) or
 ///    way too light (<0.5x) of the second half of the histogram.
-pub fn van_der_eijk(histogram: &[u32]) -> f64 {
+#[pyfunction]
+pub fn van_der_eijk(histogram: Vec<u32>) -> f64 {
     // let's get a sorted view of the histogram.
     let mut a_score = 0.0;
     let mut layer = histogram.to_vec();
@@ -35,7 +46,8 @@ pub fn van_der_eijk(histogram: &[u32]) -> f64 {
 /// Check if given histogram is bimodal.
 ///
 /// If `A` score is negative then the histogram is very likely to be bimodal.
-pub fn is_bimodal(histogram: &[u32]) -> bool {
+#[pyfunction]
+pub fn is_histogram_bimodal(histogram: Vec<u32>) -> bool {
     van_der_eijk(histogram) <= 0.0
 }
 
@@ -149,30 +161,30 @@ mod tests {
     #[test]
     fn test_van_der_eijk() {
         // unimodal and detected as unimodal.
-        assert!(van_der_eijk(&[30, 40, 210, 130, 530, 50, 10]) > 0.0);
-        assert!(van_der_eijk(&[30, 40, 210, 10, 530, 50, 10]) > 0.0);
-        assert!(van_der_eijk(&[30, 40, 10, 10, 30, 50, 100]) > 0.0);
-        assert!(van_der_eijk(&[3, 4, 1, 1, 3, 5, 10]) > 0.0);
-        assert!(van_der_eijk(&[3, 4, 1, 1, 3, 5, 1]) > 0.0);
-        assert!(van_der_eijk(&[1, 1, 1, 1, 1, 1, 1]) > 0.0);
-        assert!(van_der_eijk(&[1, 1, 1, 1, 1, 1, 1000]) > 0.0);
+        assert!(van_der_eijk(vec![30, 40, 210, 130, 530, 50, 10]) > 0.0);
+        assert!(van_der_eijk(vec![30, 40, 210, 10, 530, 50, 10]) > 0.0);
+        assert!(van_der_eijk(vec![30, 40, 10, 10, 30, 50, 100]) > 0.0);
+        assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 10]) > 0.0);
+        assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 1]) > 0.0);
+        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1]) > 0.0);
+        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1000]) > 0.0);
 
         // bimodal and detected as bimodal.
-        assert!(van_der_eijk(&[10000, 1, 1, 1, 1, 1, 10]) < 0.0);
-        assert!(van_der_eijk(&[10, 10, 0, 0, 0, 10, 10]) < 0.0);
-        assert!(van_der_eijk(&[10, 10, 0, 0, 0, 0, 10]) < 0.0);
-        assert!(van_der_eijk(&[1, 1, 1, 0, 0, 1, 1]) < 0.0);
-        assert!(van_der_eijk(&[1, 1, 1, 0, 1, 1, 1]) < 0.0);
+        assert!(van_der_eijk(vec![10000, 1, 1, 1, 1, 1, 10]) < 0.0);
+        assert!(van_der_eijk(vec![10, 10, 0, 0, 0, 10, 10]) < 0.0);
+        assert!(van_der_eijk(vec![10, 10, 0, 0, 0, 0, 10]) < 0.0);
+        assert!(van_der_eijk(vec![1, 1, 1, 0, 0, 1, 1]) < 0.0);
+        assert!(van_der_eijk(vec![1, 1, 1, 0, 1, 1, 1]) < 0.0);
 
         // Test cases that bring the limitations of the algorithm.
         // This should be bi-modal. Algo fails because weights are not balanced here.
         // One side of the see-saw is 2x heavier.
-        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 3, 3]) > 0.0);
-        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 30, 31]) > 0.0);
+        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 3, 3]) > 0.0);
+        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 30, 31]) > 0.0);
 
         // fixed versions of above tests.
-        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 10, 2]) < 0.0);
-        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 20, 11]) < 0.0);
+        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 10, 2]) < 0.0);
+        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 20, 11]) < 0.0);
     }
 
     fn compute_a_str(layer: &str) -> f64 {
