@@ -1,21 +1,84 @@
-Check bimodality of a distribution using `van_der_eijk` function.
-
-Return the A score ref <https://www.researchgate.net/publication/225958476_Measuring_Agreement_in_Ordered_Rating_Scales>
+Check bimodality of a histogram using `van_der_eijk` function.
 
 ## Limiations
 
-The first half of the histogram should not not be too heavy (>2x) or way too
-light (<0.5x) of the second half of the histogram.
+-   The first half of the histogram should not not be too heavy (>2x) or way too
+    light (<0.5x) of the second half of the histogram i.e. if you sum first half
+    of the histogram and second half of the histogram, either of them should not
+    be more than twice the value than the other.
+-   The peaks of the bimodal histogram must be at the start and end.
 
 # Usage
 
-This crate provides two functions
+This library provides two functions for both Rust and Python.
 
-- `van_der_eijk` return A score. If it is less than 0.0, the distribution is
-  very likely bimodal.
-- `is_histogram_bimodal` is a wrapper on `van_der_eijk` function and it returns
-  `True` if histogram is bimodal.
+-   `van_der_eijk` returns A-score as described in [1]. If it is less than 0.0,
+    the distribution is very likely bimodal.
+-   `is_histogram_bimodal` is a wrapper on `van_der_eijk` function and it
+    returns `True` if histogram is bimodal.
 
+## Python
+
+Here are some run on small histogram. This library typically performs much
+better on larger histogram.
+
+```bash
+>>> is_bimodal.van_der_eijk([3, 1, 3])  # A-score (negative means bimodal)
+-0.14285714285714285
+>>> is_bimodal.is_histogram_bimodal([3, 1, 3])
+True
+>>>>> is_bimodal.is_histogram_bimodal([3, 2, 3])  # the peaks are not very high
+False
+>>> is_bimodal.is_histogram_bimodal([3, 2, 4])
+False
+>>> is_bimodal.is_histogram_bimodal([4, 2, 2, 4])
+False
+>>> is_bimodal.is_histogram_bimodal([4, 1, 2, 4])
+True
+```
+
+This method doesn't work if peaks are in the middle of the histogram rather than
+at the beginning and at the end. Or perhaps I got something wrong in the
+implementation.
+
+Note that negative value in `van_der_eijk` means bimodal.
+
+All of the following should have been classified as bimodal distributions.
+
+```
+>>> is_bimodal.is_histogram_bimodal([4, 1, 2, 4, 1])
+False
+>>> is_bimodal.is_histogram_bimodal([4, 1, 1, 4, 1])
+False
+>>> is_bimodal.is_histogram_bimodal([4, 1, 1, 4, 1])
+False
+>>> is_bimodal.is_histogram_bimodal([4, 1, 1, 4, 4, 1])
+False
+>>> is_bimodal.is_histogram_bimodal([1, 4, 1, 1, 4, 4, 1])
+False
+>>> is_bimodal.is_histogram_bimodal([1, 4, 2, 1, 1, 4, 1])
+False
+>>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4, 1])
+0.46190476190476176
+>>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4, 4])
+0.3908496732026144
+>>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4,])
+0.2923076923076923
+>>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4])
+0.2923076923076923
+>>> is_bimodal.van_der_eijk([1, 4, 1, 1, 1, 4])
+0.22499999999999992
+>>> is_bimodal.van_der_eijk([4, 4, 1, 1, 4])
+0.17857142857142852
+>>> is_bimodal.van_der_eijk([4, 4, 1, 1, 4, 4])
+0.20000000000000004
+>>> is_bimodal.van_der_eijk([4, 4, 1, 1, 4, 4])
+0.20000000000000004
+```
+
+## Rust
+
+Here are some examples from unit tests.
 
 ```
 assert!(van_der_eijk(vec![30, 40, 210, 130, 530, 50, 10]) > 0.0);
@@ -41,6 +104,7 @@ assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 30, 31]) > 0.0);
 assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 20, 11]) < 0.0);
 ```
 
-## TODO
+# References
 
-- [ ] python bindings
+[1] Eijk, Cees. (2001). Measuring Agreement in Ordered Rating Scales. Quality
+and Quantity. 35. 325-341. 10.1023/A:1010374114305.
