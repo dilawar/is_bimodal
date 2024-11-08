@@ -36,7 +36,7 @@ pub fn van_der_eijk(histogram: &[u32]) -> f64 {
 ///
 /// If `A` score is negative then the histogram is very likely to be bimodal.
 pub fn is_bimodal(histogram: &[u32]) -> bool {
-    van_der_eijk(histogram) <= 0
+    van_der_eijk(histogram) <= 0.0
 }
 
 /// Compute A score. The score is computed using following equations. See
