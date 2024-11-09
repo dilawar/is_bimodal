@@ -10,7 +10,7 @@ on:
     branches:
       - main
     tags:
-      - '*'
+      - "*"
   pull_request:
   workflow_dispatch:
 
@@ -44,8 +44,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
-          sccache: 'true'
+          args: --release --out dist --find-interpreter -m python/Cargo.toml
+          sccache: "true"
           manylinux: auto
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -75,8 +75,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
-          sccache: 'true'
+          args: --release --out dist --find-interpreter -m python/Cargo.toml
+          sccache: "true"
           manylinux: musllinux_1_2
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -103,8 +103,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
-          sccache: 'true'
+          args: --release --out dist --find-interpreter -m python/Cargo.toml
+          sccache: "true"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -129,49 +129,12 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
-          sccache: 'true'
+          args: --release --out dist --find-interpreter -m python/Cargo.toml
+          sccache: "true"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-macos-${{ matrix.platform.target }}
-          path: dist
-
-  emscripten:
-    runs-on: ${{ matrix.platform.runner }}
-    strategy:
-      matrix:
-        platform:
-          - runner: ubuntu-latest
-            target: wasm32-unknown-emscripten
-    steps:
-      - uses: actions/checkout@v4
-      - run: pip install pyodide-build
-      - name: Get Emscripten and Python version info
-        shell: bash
-        run: |
-          echo EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version) >> $GITHUB_ENV
-          echo PYTHON_VERSION=$(pyodide config get python_version | cut -d '.' -f 1-2) >> $GITHUB_ENV
-          pip uninstall -y pyodide-build
-      - uses: mymindstorm/setup-emsdk@v12
-        with:
-          version: ${{ env.EMSCRIPTEN_VERSION }}
-          actions-cache-folder: emsdk-cache
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - run: pip install pyodide-build
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.platform.target }}
-          args: --release --out dist -i ${{ env.PYTHON_VERSION }}
-          sccache: 'true'
-          rust-toolchain: nightly
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wasm-wheels
           path: dist
 
   sdist:
@@ -181,7 +144,7 @@ jobs:
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
-          command: sdist
+          command: sdist -m python/Cargo.toml
           args: --out dist
       - name: Upload sdist
         uses: actions/upload-artifact@v4
@@ -192,7 +155,9 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
+    if:
+      ${{ startsWith(github.ref, 'refs/tags/') || github.event_name ==
+      'workflow_dispatch' }}
     needs: [linux, musllinux, windows, macos, emscripten, sdist]
     permissions:
       # Use to sign the release artifacts
@@ -206,7 +171,7 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: 'wheels-*/*'
+          subject-path: "wheels-*/*"
       - name: Publish to PyPI
         if: "startsWith(github.ref, 'refs/tags/')"
         uses: PyO3/maturin-action@v1
@@ -220,4 +185,5 @@ jobs:
         with:
           files: |
             wasm-wheels/*.whl
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+          prerelease:
+            ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}

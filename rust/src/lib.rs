@@ -1,28 +1,17 @@
 //! Check bimodality of a distribution using `van_der_eijk` function.
 
-use pyo3::prelude::*;
-
-/// A Python module implemented in Rust.
-#[pymodule]
-fn is_bimodal(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(is_histogram_bimodal, m)?)?;
-    m.add_function(wrap_pyfunction!(van_der_eijk, m)?)?;
-    Ok(())
-}
-
 /// Return the A score ref <https://www.researchgate.net/publication/225958476_Measuring_Agreement_in_Ordered_Rating_Scales>
 ///
 /// # Limiations
 ///
 /// 1. The first half of the histogram should not not be way too heavy (>2x) or
 ///    way too light (<0.5x) of the second half of the histogram.
-#[pyfunction]
-pub fn van_der_eijk(histogram: Vec<u32>) -> f64 {
+pub fn van_der_eijk(histogram: Vec<usize>) -> f64 {
     let mut a_score = 0.0;
     // Ensure that minimum value is 0.
     let min_value = histogram.iter().min().expect("No min value?");
     let mut layer: Vec<_> = histogram.iter().map(|x| x - min_value).collect();
-    let total = histogram.iter().sum::<u32>() as f64;
+    let total = histogram.iter().sum::<usize>() as f64;
 
     while let Some(n_min) = non_zero_min(&layer) {
         let mut layer_bin = vec![false; layer.len()];
@@ -47,8 +36,7 @@ pub fn van_der_eijk(histogram: Vec<u32>) -> f64 {
 /// Check if given histogram is bimodal.
 ///
 /// If `A` score is negative then the histogram is very likely to be bimodal.
-#[pyfunction]
-pub fn is_histogram_bimodal(histogram: Vec<u32>) -> bool {
+pub fn is_histogram_bimodal(histogram: Vec<usize>) -> bool {
     van_der_eijk(histogram) <= 0.0
 }
 
@@ -102,8 +90,8 @@ fn compute_a(layer: &[bool]) -> f64 {
 /// Find non-zero minimum element. Returns `Some(min)` if there is at least one
 /// non-zero value, `None` otherwise.
 #[inline]
-fn non_zero_min(elements: &[u32]) -> Option<u32> {
-    let mut min = u32::MAX;
+fn non_zero_min(elements: &[usize]) -> Option<usize> {
+    let mut min = usize::MAX;
     for e in elements {
         if *e == 0 {
             continue;
@@ -112,7 +100,7 @@ fn non_zero_min(elements: &[u32]) -> Option<u32> {
             min = *e;
         }
     }
-    if min == u32::MAX {
+    if min == usize::MAX {
         None
     } else {
         Some(min)
@@ -166,9 +154,9 @@ mod tests {
         assert!(van_der_eijk(vec![30, 40, 210, 10, 530, 50, 10]) > 0.0);
         assert!(van_der_eijk(vec![30, 40, 10, 10, 30, 50, 100]) > 0.0);
         assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 10]) > 0.0);
-        assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 1]) > 0.0);
-        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1]) > 0.0);
-        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1000]) > 0.0);
+        assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 1]) < 0.0);
+        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1]) == 0.0);
+        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1000]) == 0.0);
 
         // bimodal and detected as bimodal.
         assert!(van_der_eijk(vec![10000, 1, 1, 1, 1, 1, 10]) < 0.0);
