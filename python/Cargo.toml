@@ -1,10 +1,12 @@
 [package]
-name = "is-bimodal"
+name = "py_is_bimodal"
 version = "0.2.1"
 edition = "2021"
 
 [dependencies]
 tracing = "0.1.40"
+pyo3 = "*"
+is-bimodal = { path = "../rust" }
 
 [dev-dependencies]
 float_eq = "1.0.1"

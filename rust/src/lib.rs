@@ -6,12 +6,12 @@
 ///
 /// 1. The first half of the histogram should not not be way too heavy (>2x) or
 ///    way too light (<0.5x) of the second half of the histogram.
-pub fn van_der_eijk(histogram: Vec<u32>) -> f64 {
+pub fn van_der_eijk(histogram: Vec<usize>) -> f64 {
     let mut a_score = 0.0;
     // Ensure that minimum value is 0.
     let min_value = histogram.iter().min().expect("No min value?");
     let mut layer: Vec<_> = histogram.iter().map(|x| x - min_value).collect();
-    let total = histogram.iter().sum::<u32>() as f64;
+    let total = histogram.iter().sum::<usize>() as f64;
 
     while let Some(n_min) = non_zero_min(&layer) {
         let mut layer_bin = vec![false; layer.len()];
@@ -36,7 +36,7 @@ pub fn van_der_eijk(histogram: Vec<u32>) -> f64 {
 /// Check if given histogram is bimodal.
 ///
 /// If `A` score is negative then the histogram is very likely to be bimodal.
-pub fn is_histogram_bimodal(histogram: Vec<u32>) -> bool {
+pub fn is_histogram_bimodal(histogram: Vec<usize>) -> bool {
     van_der_eijk(histogram) <= 0.0
 }
 
@@ -90,8 +90,8 @@ fn compute_a(layer: &[bool]) -> f64 {
 /// Find non-zero minimum element. Returns `Some(min)` if there is at least one
 /// non-zero value, `None` otherwise.
 #[inline]
-fn non_zero_min(elements: &[u32]) -> Option<u32> {
-    let mut min = u32::MAX;
+fn non_zero_min(elements: &[usize]) -> Option<usize> {
+    let mut min = usize::MAX;
     for e in elements {
         if *e == 0 {
             continue;
@@ -100,7 +100,7 @@ fn non_zero_min(elements: &[u32]) -> Option<u32> {
             min = *e;
         }
     }
-    if min == u32::MAX {
+    if min == usize::MAX {
         None
     } else {
         Some(min)
