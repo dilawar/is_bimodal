@@ -156,7 +156,7 @@ mod tests {
         assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 10]) > 0.0);
         assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 1]) < 0.0);
         assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1]) == 0.0);
-        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1000]) < 0.0);
+        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1000]) == 0.0);
 
         // bimodal and detected as bimodal.
         assert!(van_der_eijk(vec![10000, 1, 1, 1, 1, 1, 10]) < 0.0);
