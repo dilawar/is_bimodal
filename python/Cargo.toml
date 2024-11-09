@@ -9,7 +9,7 @@ crate-type = [ "cdylib" ]
 
 [dependencies]
 tracing = "0.1.40"
-pyo3 = { version = "*", features = [ "extension-module", "abi3-py39" ]}
+pyo3 = { version = "*", features = [ "extension-module" ]}
 is-bimodal = { path = "../rust" }
 
 [dev-dependencies]
