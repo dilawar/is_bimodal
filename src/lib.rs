@@ -18,9 +18,10 @@ fn is_bimodal(m: &Bound<'_, PyModule>) -> PyResult<()> {
 ///    way too light (<0.5x) of the second half of the histogram.
 #[pyfunction]
 pub fn van_der_eijk(histogram: Vec<u32>) -> f64 {
-    // let's get a sorted view of the histogram.
     let mut a_score = 0.0;
-    let mut layer = histogram.to_vec();
+    // Ensure that minimum value is 0.
+    let min_value = histogram.iter().min().expect("No min value?");
+    let mut layer: Vec<_> = histogram.iter().map(|x| x - min_value).collect();
     let total = histogram.iter().sum::<u32>() as f64;
 
     while let Some(n_min) = non_zero_min(&layer) {
@@ -189,10 +190,9 @@ mod tests {
 
     // These should pass but currently failing.
     #[test]
-    #[ignore]
     fn test_these_should_be_bimodal() {
         assert!(is_histogram_bimodal(vec![4, 1, 1, 4, 1]));
-        assert!(is_histogram_bimodal(vec![1, 4, 1, 4, 1]));
+        assert!(is_histogram_bimodal(vec![1, 4, 1, 1, 4, 1]));
     }
 
     fn compute_a_str(layer: &str) -> f64 {
