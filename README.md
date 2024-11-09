@@ -37,44 +37,9 @@ False
 True
 ```
 
-This method doesn't work if peaks are in the middle of the histogram rather than
-at the beginning and at the end. Or perhaps I got something wrong in the
-implementation.
+See <python/tests/test_is_bimodal.py>. It has some test cases where the method works
+poorly.
 
-Note that negative value in `van_der_eijk` means bimodal.
-
-All of the following should have been classified as bimodal distributions.
-
-```
->>> is_bimodal.is_histogram_bimodal([4, 1, 2, 4, 1])
-False
->>> is_bimodal.is_histogram_bimodal([4, 1, 1, 4, 1])
-False
->>> is_bimodal.is_histogram_bimodal([4, 1, 1, 4, 1])
-False
->>> is_bimodal.is_histogram_bimodal([4, 1, 1, 4, 4, 1])
-False
->>> is_bimodal.is_histogram_bimodal([1, 4, 1, 1, 4, 4, 1])
-False
->>> is_bimodal.is_histogram_bimodal([1, 4, 2, 1, 1, 4, 1])
-False
->>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4, 1])
-0.46190476190476176
->>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4, 4])
-0.3908496732026144
->>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4,])
-0.2923076923076923
->>> is_bimodal.van_der_eijk([1, 4, 2, 1, 1, 4])
-0.2923076923076923
->>> is_bimodal.van_der_eijk([1, 4, 1, 1, 1, 4])
-0.22499999999999992
->>> is_bimodal.van_der_eijk([4, 4, 1, 1, 4])
-0.17857142857142852
->>> is_bimodal.van_der_eijk([4, 4, 1, 1, 4, 4])
-0.20000000000000004
->>> is_bimodal.van_der_eijk([4, 4, 1, 1, 4, 4])
-0.20000000000000004
-```
 
 ## Rust
 
