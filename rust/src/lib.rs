@@ -6,7 +6,7 @@
 ///
 /// 1. The first half of the histogram should not not be way too heavy (>2x) or
 ///    way too light (<0.5x) of the second half of the histogram.
-pub fn van_der_eijk(histogram: Vec<usize>) -> f64 {
+pub fn van_der_eijk(histogram: &[usize]) -> f64 {
     let mut a_score = 0.0;
     // Ensure that minimum value is 0.
     let min_value = histogram.iter().min().expect("No min value?");
@@ -36,7 +36,7 @@ pub fn van_der_eijk(histogram: Vec<usize>) -> f64 {
 /// Check if given histogram is bimodal.
 ///
 /// If `A` score is negative then the histogram is very likely to be bimodal.
-pub fn is_histogram_bimodal(histogram: Vec<usize>) -> bool {
+pub fn is_histogram_bimodal(histogram: &[usize]) -> bool {
     van_der_eijk(histogram) <= 0.0
 }
 
@@ -150,37 +150,37 @@ mod tests {
     #[test]
     fn test_van_der_eijk() {
         // unimodal and detected as unimodal.
-        assert!(van_der_eijk(vec![30, 40, 210, 130, 530, 50, 10]) > 0.0);
-        assert!(van_der_eijk(vec![30, 40, 210, 10, 530, 50, 10]) > 0.0);
-        assert!(van_der_eijk(vec![30, 40, 10, 10, 30, 50, 100]) > 0.0);
-        assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 10]) > 0.0);
-        assert!(van_der_eijk(vec![3, 4, 1, 1, 3, 5, 1]) < 0.0);
-        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1]) == 0.0);
-        assert!(van_der_eijk(vec![1, 1, 1, 1, 1, 1, 1000]) == 0.0);
+        assert!(van_der_eijk(&[30, 40, 210, 130, 530, 50, 10]) > 0.0);
+        assert!(van_der_eijk(&[30, 40, 210, 10, 530, 50, 10]) > 0.0);
+        assert!(van_der_eijk(&[30, 40, 10, 10, 30, 50, 100]) > 0.0);
+        assert!(van_der_eijk(&[3, 4, 1, 1, 3, 5, 10]) > 0.0);
+        assert!(van_der_eijk(&[3, 4, 1, 1, 3, 5, 1]) < 0.0);
+        assert!(van_der_eijk(&[1, 1, 1, 1, 1, 1, 1]) == 0.0);
+        assert!(van_der_eijk(&[1, 1, 1, 1, 1, 1, 1000]) == 0.0);
 
         // bimodal and detected as bimodal.
-        assert!(van_der_eijk(vec![10000, 1, 1, 1, 1, 1, 10]) < 0.0);
-        assert!(van_der_eijk(vec![10, 10, 0, 0, 0, 10, 10]) < 0.0);
-        assert!(van_der_eijk(vec![10, 10, 0, 0, 0, 0, 10]) < 0.0);
-        assert!(van_der_eijk(vec![1, 1, 1, 0, 0, 1, 1]) < 0.0);
-        assert!(van_der_eijk(vec![1, 1, 1, 0, 1, 1, 1]) < 0.0);
+        assert!(van_der_eijk(&[10000, 1, 1, 1, 1, 1, 10]) < 0.0);
+        assert!(van_der_eijk(&[10, 10, 0, 0, 0, 10, 10]) < 0.0);
+        assert!(van_der_eijk(&[10, 10, 0, 0, 0, 0, 10]) < 0.0);
+        assert!(van_der_eijk(&[1, 1, 1, 0, 0, 1, 1]) < 0.0);
+        assert!(van_der_eijk(&[1, 1, 1, 0, 1, 1, 1]) < 0.0);
 
         // Test cases that bring the limitations of the algorithm.
         // This should be bi-modal. Algo fails because weights are not balanced here.
         // One side of the see-saw is 2x heavier.
-        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 3, 3]) > 0.0);
-        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 30, 31]) > 0.0);
+        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 3, 3]) > 0.0);
+        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 30, 31]) > 0.0);
 
         // fixed versions of above tests.
-        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 10, 2]) < 0.0);
-        assert!(van_der_eijk(vec![10, 11, 0, 0, 0, 0, 20, 11]) < 0.0);
+        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 10, 2]) < 0.0);
+        assert!(van_der_eijk(&[10, 11, 0, 0, 0, 0, 20, 11]) < 0.0);
     }
 
     // These should pass but currently failing.
     #[test]
     fn test_these_should_be_bimodal() {
-        assert!(is_histogram_bimodal(vec![4, 1, 1, 4, 1]));
-        assert!(is_histogram_bimodal(vec![1, 4, 1, 1, 4, 1]));
+        assert!(is_histogram_bimodal(&[4, 1, 1, 4, 1]));
+        assert!(is_histogram_bimodal(&[1, 4, 1, 1, 4, 1]));
     }
 
     fn compute_a_str(layer: &str) -> f64 {
@@ -211,5 +211,23 @@ mod tests {
         assert_float_eq!(-0.267, compute_a_str("1000100"), abs <= 0.001);
         assert_float_eq!(-0.633, compute_a_str("1000010"), abs <= 0.001);
         assert_float_eq!(-1.000, compute_a_str("1000001"), abs <= 0.001);
+    }
+
+    #[test]
+    fn test_hist() {
+        let csv = include_str!("../test/hist.txt");
+
+        for line in csv.lines() {
+            let fs: Vec<_> = line.trim().split(',').map(|x| x.trim()).collect();
+            let expected = fs[0].parse::<bool>().unwrap();
+            let hist: Vec<_> = fs[1..]
+                .iter()
+                .flat_map(|x| x.parse::<usize>().ok())
+                .collect();
+
+            let got = is_histogram_bimodal(&hist);
+            let a_score = van_der_eijk(&hist);
+            eprintln!("expected={expected}, is_bimodal={got}, a-score={a_score}. {hist:?}");
+        }
     }
 }

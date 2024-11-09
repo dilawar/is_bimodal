@@ -2,12 +2,12 @@ use pyo3::prelude::*;
 
 #[pyfunction]
 fn van_der_eijk(histogram: Vec<usize>) -> f64 {
-    ::is_bimodal::van_der_eijk(histogram)
+    ::is_bimodal::van_der_eijk(&histogram)
 }
 
 #[pyfunction]
 fn is_histogram_bimodal(histogram: Vec<usize>) -> bool {
-    ::is_bimodal::is_histogram_bimodal(histogram)
+    ::is_bimodal::is_histogram_bimodal(&histogram)
 }
 
 #[pymodule]
