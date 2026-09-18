@@ -9,7 +9,6 @@ name = "is_bimodal"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-tracing = "0.1.44"
 pyo3 = "0.29"
 
 [dev-dependencies]

@@ -58,10 +58,7 @@ pub fn van_der_eijk(histogram: &[u32]) -> Option<f64> {
         });
         let a = compute_a(&layer_bin);
         a_score += weight * a;
-        // tracing::trace!("> {n_min}, weight={weight:.3} a={a}:
-        // layer={layer_bin:?}");
     }
-    tracing::debug!("a_score={a_score} for sequence {histogram:?}");
     Some(a_score)
 }
 
